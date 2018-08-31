@@ -14,6 +14,7 @@ import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.ViewOutlineProvider
 import android.widget.Button
 import java.util.*
 
@@ -61,7 +62,7 @@ class MainActivity : AppCompatActivity() {
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setVideoEncoder(MediaRecorder.VideoEncoder.H264)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            setVideoEncodingBitRate(10 * 1024 * 1024)
+            setVideoEncodingBitRate(4 * 1024 * 1024)
             setVideoFrameRate(30)
             setVideoSize(outMetrics.widthPixels, outMetrics.heightPixels)
             val file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).path + "/" + Date().time + ".mp4"
@@ -96,8 +97,10 @@ class MainActivity : AppCompatActivity() {
                     Log.d("MyScreen", "onStopped()")
                 }
             }, Handler())
-            mediaRecorder.start()
         }
+
+        mediaRecorder.start()
+        this@MainActivity.moveTaskToBack(true)
     }
 
     override fun onDestroy() {
