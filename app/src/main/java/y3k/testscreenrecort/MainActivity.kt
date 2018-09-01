@@ -14,7 +14,6 @@ import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.ViewOutlineProvider
 import android.widget.Button
 import java.util.*
 
@@ -49,6 +48,10 @@ class MainActivity : AppCompatActivity() {
                 super.onActivityResult(requestCode, resultCode, data)
             }
         }
+    }
+
+    override fun onBackPressed() {
+        moveTaskToBack(true)
     }
 
     private fun startProjectionRecord(projection: MediaProjection) {
