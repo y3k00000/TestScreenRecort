@@ -2,4 +2,5 @@
     <string name="app_name">TestScreenRecort</string>
     <string name="btn_stop">Stop</string>
     <string name="btn_start">Start</string>
+    <string name="bitrate_spinner_unit">mbps</string>
 </resources>

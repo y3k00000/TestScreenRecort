@@ -17,8 +17,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
 import android.util.Log
-import android.widget.Button
-import android.widget.Toast
+import android.widget.*
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -37,9 +36,18 @@ class MainActivity : AppCompatActivity() {
             projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
             startActivityForResult(projectionManager.createScreenCaptureIntent(), 1234)
         }
+        findViewById<Spinner>(R.id.spinner_bitrate).apply {
+            ArrayAdapter.createFromResource(this@MainActivity,R.array.bitrate_available,R.layout.support_simple_spinner_dropdown_item).apply {
+                adapter = this
+                this.notifyDataSetChanged()
+            }
+        }
+        findViewById<Spinner>(R.id.spinner_bitrate).setSelection(0)
         if (!requiredPermissions.all { ActivityCompat.checkSelfPermission(this@MainActivity, it) == PackageManager.PERMISSION_GRANTED }) {
             ActivityCompat.requestPermissions(this@MainActivity, requiredPermissions, 5678)
         }
+        val bitrate = findViewById<Spinner>(R.id.spinner_bitrate).selectedItem as String
+        Log.d("Bitrate",bitrate)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -87,7 +95,8 @@ class MainActivity : AppCompatActivity() {
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setVideoEncoder(MediaRecorder.VideoEncoder.H264)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            setVideoEncodingBitRate(4 * 1024 * 1024)
+            val bitrate = findViewById<Spinner>(R.id.spinner_bitrate).selectedItem as String
+            setVideoEncodingBitRate(bitrate.toInt() * 1024 * 1024)
             setVideoFrameRate(30)
             setVideoSize(outMetrics.widthPixels, outMetrics.heightPixels)
             val file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).path + "/" + Date().time + ".mp4"
