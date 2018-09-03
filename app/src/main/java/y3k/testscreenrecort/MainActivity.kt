@@ -1,7 +1,9 @@
 package y3k.testscreenrecort
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.MediaRecorder
@@ -11,10 +13,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -24,12 +28,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var virtualDisplay: VirtualDisplay
     private lateinit var mediaRecorder: MediaRecorder
 
+    private val requiredPermissions = arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         findViewById<Button>(R.id.button).setOnClickListener {
             projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
             startActivityForResult(projectionManager.createScreenCaptureIntent(), 1234)
+        }
+        if (!requiredPermissions.all { ActivityCompat.checkSelfPermission(this@MainActivity, it) == PackageManager.PERMISSION_GRANTED }) {
+            ActivityCompat.requestPermissions(this@MainActivity, requiredPermissions, 5678)
         }
     }
 
@@ -46,6 +55,20 @@ class MainActivity : AppCompatActivity() {
             }
             else -> {
                 super.onActivityResult(requestCode, resultCode, data)
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            5678 -> {
+                if (!grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                    Toast.makeText(this@MainActivity, "Require Permissions to continue", Toast.LENGTH_LONG).show()
+                    this@MainActivity.finish()
+                }
+            }
+            else -> {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
             }
         }
     }
@@ -107,11 +130,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        mediaRecorder.apply {
-            stop()
-            release()
+        if (this@MainActivity::virtualDisplay.isInitialized) {
+            mediaRecorder.apply {
+                stop()
+                release()
+            }
         }
-        virtualDisplay.release()
+        if (this@MainActivity::virtualDisplay.isInitialized) {
+            virtualDisplay.release()
+        }
         sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
                 Uri.fromFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES))))
         super.onDestroy()
