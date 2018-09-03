@@ -78,7 +78,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startProjectionRecord(projection: MediaProjection) {
-        Log.d("MediaProjection", "startProjectionRecord")
         this.projection = projection
         val outMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(outMetrics)
@@ -105,7 +104,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         projection.apply {
-            Log.d("MyScreen", ".apply")
             projection.registerCallback(callback, Handler())
             virtualDisplay = createVirtualDisplay("MyScreen", outMetrics.widthPixels, outMetrics.heightPixels, outMetrics.densityDpi, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mediaRecorder.surface, object : VirtualDisplay.Callback() {
                 override fun onPaused() {
@@ -132,12 +130,20 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         if (this@MainActivity::virtualDisplay.isInitialized) {
             mediaRecorder.apply {
-                stop()
-                release()
+                try {
+                    stop()
+                    release()
+                } catch (e:Exception){
+                    e.printStackTrace()
+                }
             }
         }
         if (this@MainActivity::virtualDisplay.isInitialized) {
-            virtualDisplay.release()
+            try {
+                virtualDisplay.release()
+            } catch (e:Exception){
+                e.printStackTrace()
+            }
         }
         sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
                 Uri.fromFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES))))
