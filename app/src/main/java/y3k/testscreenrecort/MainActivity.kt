@@ -17,7 +17,6 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.View
 import android.widget.*
 import java.util.*
 
@@ -40,8 +39,6 @@ class MainActivity : AppCompatActivity() {
         if (!requiredPermissions.all { ActivityCompat.checkSelfPermission(this@MainActivity, it) == PackageManager.PERMISSION_GRANTED }) {
             ActivityCompat.requestPermissions(this@MainActivity, requiredPermissions, 5678)
         }
-        val bitrate = findViewById<Spinner>(R.id.spinner_bitrate).selectedItem as String
-        Log.d("Bitrate",bitrate)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
