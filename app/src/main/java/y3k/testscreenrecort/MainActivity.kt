@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.View
 import android.widget.*
 import java.util.*
 
@@ -36,13 +37,6 @@ class MainActivity : AppCompatActivity() {
             projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
             startActivityForResult(projectionManager.createScreenCaptureIntent(), 1234)
         }
-        findViewById<Spinner>(R.id.spinner_bitrate).apply {
-            ArrayAdapter.createFromResource(this@MainActivity,R.array.bitrate_available,R.layout.support_simple_spinner_dropdown_item).apply {
-                adapter = this
-                this.notifyDataSetChanged()
-            }
-        }
-        findViewById<Spinner>(R.id.spinner_bitrate).setSelection(0)
         if (!requiredPermissions.all { ActivityCompat.checkSelfPermission(this@MainActivity, it) == PackageManager.PERMISSION_GRANTED }) {
             ActivityCompat.requestPermissions(this@MainActivity, requiredPermissions, 5678)
         }
@@ -57,6 +51,9 @@ class MainActivity : AppCompatActivity() {
                 findViewById<Button>(R.id.button).apply {
                     text = this@MainActivity.getString(R.string.btn_stop)
                     setOnClickListener {
+                        this@MainActivity.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(
+                                Uri.fromFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)),
+                                "resource/folder"))
                         this@MainActivity.finish()
                     }
                 }
@@ -87,15 +84,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun startProjectionRecord(projection: MediaProjection) {
         this.projection = projection
+
         val outMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(outMetrics)
+
+        val bitrate = findViewById<Spinner>(R.id.spinner_bitrate).selectedItem as String
+
         mediaRecorder = MediaRecorder().apply {
             setAudioSource(MediaRecorder.AudioSource.DEFAULT)
             setVideoSource(MediaRecorder.VideoSource.SURFACE)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setVideoEncoder(MediaRecorder.VideoEncoder.H264)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            val bitrate = findViewById<Spinner>(R.id.spinner_bitrate).selectedItem as String
             setVideoEncodingBitRate(bitrate.toInt() * 1024 * 1024)
             setVideoFrameRate(30)
             setVideoSize(outMetrics.widthPixels, outMetrics.heightPixels)
@@ -133,6 +133,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         mediaRecorder.start()
+
+        findViewById<TextView>(R.id.text_view_bitrate).text = resources.getString(R.string.bitrate_text,bitrate)
+        findViewById<Spinner>(R.id.spinner_bitrate).apply {
+            (parent as LinearLayout).removeView(this)
+        }
+
         this@MainActivity.moveTaskToBack(true)
     }
 

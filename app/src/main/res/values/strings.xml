@@ -3,4 +3,5 @@
     <string name="btn_stop">Stop</string>
     <string name="btn_start">Start</string>
     <string name="bitrate_spinner_unit">mbps</string>
+    <string name="bitrate_text">%1$s Mbps</string>
 </resources>
